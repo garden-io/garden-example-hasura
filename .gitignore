@@ -1,0 +1,31 @@
+# OS
+.DS_STORE
+
+# Logs
+*.log
+npm-debug.log*
+
+# vendor dependencies
+node_modules
+/vendor/
+
+# IDEs
+.idea
+*.iml
+.vscode
+.vs
+.history
+*~
+*.swp
+*.swo
+
+# Runtime files
+.garden
+tmp/
+metadata.json
+
+# TS cache on the CI
+ts-node-*
+
+#debug files
+debug-info-*

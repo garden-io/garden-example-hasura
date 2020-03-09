@@ -1,0 +1,51 @@
+kind: Module
+description: Postgres container
+type: container
+name: postgres
+image: postgres:11.7-alpine
+services:
+  - name: postgres
+    volumes:
+      - name: data
+        containerPath: /db-data
+    ports:
+      - name: db
+        containerPort: 5432
+    env:
+      POSTGRES_DATABASE: ${var.pg-database}
+      POSTGRES_USER: ${var.pg-user}
+      POSTGRES_PASSWORD: ${var.pg-password}
+    healthCheck:
+      command: [
+        psql,
+        -w,
+        -U, "${var.pg-user}",
+        -d, "${var.pg-database}",
+        -c, "SELECT 1",
+      ]
+tasks:
+  - name: db-init
+    command: [/bin/sh, -c]
+    # The postgres health check appears to go through before the server accepts remote connections, so we need to
+    # sleep for a while.
+    # https://github.com/CrunchyData/crunchy-containers/issues/653
+    args: [
+      'sleep 15 && psql -w --host ${var.pg-host} --port 5432 -d ${var.pg-database} -c "CREATE TABLE IF NOT EXISTS author (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, created_at timestamp default NULL)" -c "INSERT INTO author (name) VALUES (''J.K Rowling'')"'
+    ]
+    dependencies: [postgres]
+    env: &env
+      PGDATABASE: ${var.pg-database}
+      PGUSER: ${var.pg-user}
+      PGPASSWORD: ${var.pg-password}
+  - name: db-clear
+    args: [
+      psql,
+      -w,
+      --host, "${var.pg-host}",
+      --port, "5432",
+      -d, "${var.pg-database}",
+      -c, "TRUNCATE author",
+    ]
+    dependencies: [postgres]
+    env:
+      <<: *env

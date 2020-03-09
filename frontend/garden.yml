@@ -1,0 +1,24 @@
+kind: Module
+name: frontend
+description: Frontend service container
+type: container
+hotReload:
+  sync:
+    - target: /app/src
+      source: src
+services:
+  - name: frontend
+    ports:
+      - name: http
+        containerPort: 8080
+    healthCheck:
+      httpGet:
+        path: /
+        port: http
+    ingresses:
+      - path: /
+        port: http
+    env:
+      GATSBY_HASURA_GRAPHQL_URL: http://${var.hasura-hostname}/v1/graphql
+    dependencies:
+      - db-init

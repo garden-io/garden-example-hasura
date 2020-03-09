@@ -1,0 +1,27 @@
+kind: Module
+description: Hasura GraphQL Engine
+type: container
+name: hasura
+image: hasura/graphql-engine:v1.1.0
+services:
+  - name: hasura
+    ports:
+      - name: http
+        containerPort: 8080
+    ingresses:
+      - path: /
+        port: http
+        hostname: ${var.hasura-hostname}
+    healthCheck:
+      httpGet:
+        path: /healthz
+        port: http
+    env:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${var.pg-user}:${var.pg-password}@${var.pg-host}:5432/${var.pg-database}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: true
+      HASURA_GRAPHQL_MIGRATIONS_DIR: '/migrations'
+      HASURA_GRAPHQL_CORS_DOMAIN: '*'
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
+      HASURA_GRAPHQL_LOG_LEVEL: debug
+    dependencies:
+      - postgres

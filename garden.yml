@@ -1,0 +1,26 @@
+kind: Project
+name: hasura-example
+
+variables:
+  pg-database: postgres
+  pg-user: postgres
+  pg-password: test-password # Only use for testing!
+  pg-host: postgres
+  hasura-hostname: hasura.local.app.garden
+
+environments:
+  - name: local
+  - name: remote
+    variables:
+      hasura-hostname: hasura.${local.env.USER || local.username}-hasura-example.my-domain.com # <--- Set this to your own domain for remote development
+
+providers:
+  - name: local-kubernetes
+    environments: [local]
+  - name: kubernetes
+    environments: [remote]
+    # Replace these values as appropriate
+    context: my-context # <--- Set this to our Kubernetes context
+    namespace: hasura-example-${local.env.USER || local.username}
+    defaultHostname: ${local.env.USER || local.username}-hasura-example.my-domain.com # <--- Set this to your own domain
+    buildMode: cluster-docker
